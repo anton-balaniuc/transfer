@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<server description="${project.name}">
+
+    <featureManager>
+        <feature>jaxrs-2.1</feature>
+        <feature>jsonp-1.1</feature>
+        <feature>jsonb-1.1</feature>
+        <feature>mpOpenAPI-1.1</feature>
+        <feature>cdi-2.0</feature>
+        <feature>beanValidation-2.0</feature>
+    </featureManager>
+
+    <httpEndpoint id="defaultHttpEndpoint"
+                  httpPort="8181"
+                  httpsPort="8543"/>
+
+    <webApplication location="${project.name}.war" contextRoot="/"/>
+
+    <logging traceSpecification="org.eclipse.microprofile.openapi.*=all"/>
+<!--    <mpMetrics authentication="false"/>-->
+
+<!--    &lt;!&ndash; This is the keystore that will be used by SSL and by JWT. &ndash;&gt;-->
+<!--    <keyStore id="defaultKeyStore" location="public.jks" type="JKS" password="atbash" />-->
+
+
+<!--    &lt;!&ndash; The MP JWT configuration that injects the caller's JWT into a ResourceScoped bean for inspection. &ndash;&gt;-->
+<!--    <mpJwt id="jwtUserConsumer" keyName="theKeyId" audiences="targetService" issuer="${jwt.issuer}"/>-->
+
+    <!-- Derby Library Configuration -->
+    <library id="derbyJDBCLib">
+        <fileset dir="${shared.resource.dir}" includes="derby*.jar"/>
+    </library>
+
+    <!-- Datasource Configuration -->
+    <dataSource id="account-jpa-datasource"
+                jndiName="jdbc/account-jpa-datasource">
+        <jdbcDriver libraryRef="derbyJDBCLib" />
+        <properties.derby.embedded databaseName="TransferDB" createDatabase="create"/>
+    </dataSource>
+
+</server>
