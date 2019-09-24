@@ -1,14 +1,12 @@
 package com.payments.account.model;
 
-import javax.persistence.Column;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.OneToOne;
+import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.util.Objects;
 
+@Entity
+@Table(name = "Transaction")
 public class Transaction {
 
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -16,14 +14,16 @@ public class Transaction {
     @Column
     private int id;
     @OneToOne
+    @JoinColumn(name = "debit")
     private Account debit;
     @OneToOne
+    @JoinColumn(name = "credit")
     private Account credit;
     @Column
     private BigDecimal amount;
     @Column
     @NotNull
-    private Operation operation;
+    private TransactionType transactionType;
 
     public int getId() {
         return id;
@@ -57,18 +57,18 @@ public class Transaction {
         this.amount = amount;
     }
 
-    public Operation getOperation() {
-        return operation;
+    public TransactionType getTransactionType() {
+        return transactionType;
     }
 
-    public void setOperation(Operation operation) {
-        this.operation = operation;
+    public void setTransactionType(TransactionType transactionType) {
+        this.transactionType = transactionType;
     }
 
     @Override
     public String toString() {
         return "Transaction{" + "id=" + id + ", debit=" + debit + ", credit=" + credit + ", amount=" + amount + ", " +
-                "operation=" + operation + '}';
+                "operation=" + transactionType + '}';
     }
 
     @Override
@@ -78,11 +78,11 @@ public class Transaction {
         if (o == null || getClass() != o.getClass())
             return false;
         Transaction that = (Transaction) o;
-        return id == that.id && Objects.equals(debit, that.debit) && Objects.equals(credit, that.credit) && Objects.equals(amount, that.amount) && operation == that.operation;
+        return id == that.id && Objects.equals(debit, that.debit) && Objects.equals(credit, that.credit) && Objects.equals(amount, that.amount) && transactionType == that.transactionType;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, debit, credit, amount, operation);
+        return Objects.hash(id, debit, credit, amount, transactionType);
     }
 }

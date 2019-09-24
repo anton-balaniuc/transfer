@@ -6,6 +6,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.util.List;
+import java.util.Optional;
 
 @ApplicationScoped
 public class AccountDao {
@@ -14,14 +15,24 @@ public class AccountDao {
     private EntityManager em;
 
     public void create(Account account) {
+        account.setId(0);
         em.persist(account);
     }
 
     public Account find(Integer id) {
         return em.find(Account.class, id);
     }
+    public List<Account> findByEmail(String email) {
+        return em.createNamedQuery("Account.findByEmail", Account.class)
+                .setParameter("email", email)
+                .getResultList();
+    }
 
     public List<Account> getAll() {
         return em.createNamedQuery("Account.findAll", Account.class).getResultList();
+    }
+
+    public void update(Account account) {
+        em.persist(account);
     }
 }
