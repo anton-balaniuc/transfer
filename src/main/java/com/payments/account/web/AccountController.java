@@ -29,12 +29,11 @@ public class AccountController {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Transactional
-    @Operation(
-            summary = "Registers new account")
+    @Operation(summary = "Registers new account")
 
     public Response register(@Valid Account newAccount) {
         if (!accountDao.findByEmail(newAccount.getEmail()).isEmpty()) {
-            throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST).entity(new Error(Error.ACCOUNT_EXISTS)).build());
+            throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST).entity(Error.ACCOUNT_EXISTS).build());
         }
         accountDao.create(newAccount);
         return Response.status(Response.Status.CREATED).entity(newAccount.getId()).build();
@@ -86,6 +85,58 @@ public class AccountController {
     @Path("{id}/withdrawal/{amount}")
     @Transactional
     public Response withdrawal(@PathParam("id") @Positive int accountId, @PathParam("amount") @Positive BigDecimal amount) {
+        Account account = accountDao.find(accountId);
+        if (account == null) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+
+        if (account.getBalance().compareTo(amount) < 0 ) {
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
+
+        Transaction transaction = new Transaction();
+        transaction.setTransactionType(TransactionType.WITHDRAW);
+        transaction.setAmount(amount);
+        transaction.setCredit(account);
+        transaction.setDebit(account);
+
+        account.withdrawal(amount);
+        accountDao.update(account);
+        transactionDao.create(transaction);
+        return Response.ok().build();
+    }
+
+    @PUT
+    @Path("{from}/transfer/{to}/{amount}")
+    @Transactional
+    public Response transfer(@PathParam("from") @Positive int from,
+                             @PathParam("to") @Positive int to,
+                             @PathParam("amount") @Positive BigDecimal amount) {
+        Account sender = accountDao.find(from);
+        if (sender == null) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+
+        if (sender.getBalance().compareTo(amount) < 0 ) {
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
+
+        Account receiver = accountDao.find(to);
+        if (receiver == null) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+
+
+
+        Transaction transaction = new Transaction();
+        transaction.setTransactionType(TransactionType.TRANSFER);
+        transaction.setAmount(amount);
+        transaction.setCredit(sender);
+        transaction.setDebit(receiver);
+
+        receiver.withdrawal(amount);
+        accountDao.update(receiver);
+        transactionDao.create(transaction);
         return Response.ok().build();
     }
 }

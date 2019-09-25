@@ -2,19 +2,35 @@
 <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
          xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+    <parent>
+        <groupId>net.wasdev.wlp.maven.parent</groupId>
+        <artifactId>liberty-maven-app-parent</artifactId>
+        <version>RELEASE</version>
+    </parent>
+
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.payments</groupId>
     <artifactId>account</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>war</packaging>
+
     <properties>
-        <openliberty.maven.version>2.2</openliberty.maven.version>
+        <openliberty.maven.version>3.0.M1</openliberty.maven.version>
         <final.name>account</final.name>
         <failOnMissingWebXml>false</failOnMissingWebXml>
         <openliberty.version>RELEASE</openliberty.version>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
+        <backend.service.http.port>5050</backend.service.http.port>
+        <backend.service.https.port>5051</backend.service.https.port>
+        <frontend.service.http.port>9090</frontend.service.http.port>
+        <frontend.service.https.port>9091</frontend.service.https.port>
+        <version.exec-maven-plugin>1.6.0</version.exec-maven-plugin>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.eclipse.microprofile</groupId>
@@ -49,91 +65,186 @@
             <version>19.0.0.9</version>
             <type>esa</type>
         </dependency>
-
-
+        <!-- ... -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>5.5.2</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- ... -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>5.5.2</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.cxf</groupId>
+            <artifactId>cxf-rt-rs-client</artifactId>
+            <version>3.2.6</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.cxf</groupId>
+            <artifactId>cxf-rt-rs-extension-providers</artifactId>
+            <version>3.2.6</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish</groupId>
+            <artifactId>javax.json</artifactId>
+            <version>1.0.4</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>javax.json.bind</groupId>
+            <artifactId>javax.json.bind-api</artifactId>
+            <version>1.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse</groupId>
+            <artifactId>yasson</artifactId>
+            <version>1.0</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- Support for JDK 9 and above -->
+        <dependency>
+            <groupId>javax.xml.bind</groupId>
+            <artifactId>jaxb-api</artifactId>
+            <version>2.3.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb-core</artifactId>
+            <version>2.3.0.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb-impl</artifactId>
+            <version>2.3.2</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>javax.activation</groupId>
+            <artifactId>activation</artifactId>
+            <version>1.1.1</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
+
     <build>
         <finalName>account</finalName>
-    </build>
-    <profiles>
-        <profile>
-            <id>liberty</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <build>
-                <plugins>
+        <plugins>
 
-
-                    <plugin>
-                        <groupId>net.wasdev.wlp.maven.plugins</groupId>
-                        <artifactId>liberty-maven-plugin</artifactId>
-                        <version>${openliberty.maven.version}</version>
-                        <executions>
-                            <execution>
-                                <id>prepare</id>
-                                <phase>compile</phase>
-                                <goals>
-                                    <goal>create-server</goal>
-                                </goals>
-                                <configuration>
-                                    <outputDirectory>target/wlp-package</outputDirectory>
-                                </configuration>
-                            </execution>
-                            <execution>
-                                <id>package-server</id>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>install-apps</goal>
-                                    <goal>package-server</goal>
-                                </goals>
-                                <configuration>
-                                    <outputDirectory>target/wlp-package</outputDirectory>
-                                </configuration>
-                            </execution>
-                        </executions>
-
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>2.10</version>
+                <executions>
+                    <execution>
+                        <id>copy-derby-dependency</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
                         <configuration>
-                            <assemblyArtifact>
-                                <groupId>io.openliberty</groupId>
-                                <artifactId>openliberty-runtime</artifactId>
-                                <version>${openliberty.version}</version>
-                                <type>zip</type>
-                            </assemblyArtifact>
-                            <configFile>src/main/liberty/config/server.xml</configFile>
-                            <appArchive>${project.build.directory}/${final.name}.war</appArchive>
-                            <packageFile>${project.build.directory}/${final.name}.jar</packageFile>
-                            <include>runnable</include>
-                            <serverName>${final.name}</serverName>
-                            <installAppPackages>project</installAppPackages>
-                            <configDirectory>${project.basedir}/src/main/liberty/server</configDirectory>
-                            <bootstrapProperties>
-                                <project.name>${final.name}</project.name>
-                                <jwt.issuer>https://server.example.com</jwt.issuer>
-                            </bootstrapProperties>
+                            <includeArtifactIds>derby</includeArtifactIds>
+                            <outputDirectory>${project.build.directory}/liberty/wlp/usr/shared/resources/
+                            </outputDirectory>
                         </configuration>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-dependency-plugin</artifactId>
-                        <version>2.10</version>
-                        <executions>
-                            <execution>
-                                <id>copy-derby-dependency</id>
-                                <phase>compile</phase>
-                                <goals>
-                                    <goal>copy-dependencies</goal>
-                                </goals>
-                                <configuration>
-                                    <includeArtifactIds>derby</includeArtifactIds>
-                                    <outputDirectory>${project.build.directory}/liberty/wlp/usr/shared/resources/
-                                    </outputDirectory>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>net.wasdev.wlp.maven.plugins</groupId>
+                <artifactId>liberty-maven-plugin</artifactId>
+                <configuration>
+                    <assemblyArtifact>
+                        <groupId>io.openliberty</groupId>
+                        <artifactId>openliberty-runtime</artifactId>
+                        <version>RELEASE</version>
+                        <type>zip</type>
+                    </assemblyArtifact>
+                    <configFile>src/main/liberty/config/server.xml</configFile>
+                    <appArchive>${project.build.directory}/${final.name}.war</appArchive>
+                    <packageFile>${project.build.directory}/${final.name}.jar</packageFile>
+                    <include>runnable</include>
+                    <serverName>${final.name}</serverName>
+                    <installAppPackages>project</installAppPackages>
+                    <configDirectory>${project.basedir}/src/main/liberty/server</configDirectory>
+                    <bootstrapProperties>
+                        <project.name>${final.name}</project.name>
+                        <jwt.issuer>https://server.example.com</jwt.issuer>
+                    </bootstrapProperties>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>install-apps</id>
+                        <configuration>
+                            <looseApplication>true</looseApplication>
+                            <stripVersion>true</stripVersion>
+                            <installAppPackages>project</installAppPackages>
+                        </configuration>
+                    </execution>
+                </executions>
+
+
+            </plugin>
+
+
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.0.0-M1</version>
+                <executions>
+                    <execution>
+                        <phase>test</phase>
+                        <id>default-test</id>
+                        <configuration>
+                            <excludes>
+                                <exclude>**/integration/**</exclude>
+                            </excludes>
+                            <reportsDirectory>${project.build.directory}/test-reports/unit</reportsDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>3.0.0-M1</version>
+                <executions>
+                    <execution>
+                        <phase>integration-test</phase>
+                        <id>integration-test</id>
+                        <goals>
+                            <goal>integration-test</goal>
+                        </goals>
+                        <configuration>
+                            <includes>
+                                <include>**/integration/**</include>
+                            </includes>
+                            <systemPropertyVariables>
+                              <backend.http.port>${backend.service.http.port}</backend.http.port>
+                            </systemPropertyVariables>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>verify-results</id>
+                        <goals>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <summaryFile>${project.build.directory}/test-reports/integration/failsafe-summary.xml</summaryFile>
+                    <reportsDirectory>${project.build.directory}/test-reports/integration</reportsDirectory>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>
