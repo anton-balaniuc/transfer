@@ -6,18 +6,19 @@ import java.math.BigDecimal;
 import java.util.Objects;
 
 @Entity
-@Table(name = "Transaction")
+@Table(name = "AccountTransaction")
+@NamedQuery(name = "Transaction.findAll", query = "SELECT t FROM Transaction t")
 public class Transaction {
 
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Id
     @Column
     private int id;
-    @OneToOne
-    @JoinColumn(name = "debit")
+    @ManyToOne
+    @JoinColumn
     private Account debit;
     @OneToOne
-    @JoinColumn(name = "credit")
+    @JoinColumn
     private Account credit;
     @Column
     private BigDecimal amount;

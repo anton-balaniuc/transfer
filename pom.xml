@@ -7,14 +7,6 @@
     <artifactId>account</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>war</packaging>
-    <properties>
-        <openliberty.maven.version>2.2</openliberty.maven.version>
-        <final.name>account</final.name>
-        <failOnMissingWebXml>false</failOnMissingWebXml>
-        <openliberty.version>RELEASE</openliberty.version>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
-    </properties>
     <dependencies>
         <dependency>
             <groupId>org.eclipse.microprofile</groupId>
@@ -49,9 +41,29 @@
             <version>19.0.0.9</version>
             <type>esa</type>
         </dependency>
-
-
+        <!-- ... -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>5.5.2</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- ... -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>5.5.2</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
+    <properties>
+        <openliberty.maven.version>2.2</openliberty.maven.version>
+        <final.name>account</final.name>
+        <failOnMissingWebXml>false</failOnMissingWebXml>
+        <openliberty.version>RELEASE</openliberty.version>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+    </properties>
     <build>
         <finalName>account</finalName>
     </build>
@@ -63,7 +75,6 @@
             </activation>
             <build>
                 <plugins>
-
 
                     <plugin>
                         <groupId>net.wasdev.wlp.maven.plugins</groupId>
@@ -132,6 +143,39 @@
                             </execution>
                         </executions>
                     </plugin>
+
+                    <plugin>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>2.22.2</version>
+                    </plugin>
+<!--                    <plugin>-->
+<!--                        <artifactId>maven-failsafe-plugin</artifactId>-->
+<!--                        <version>2.22.2</version>-->
+<!--&lt;!&ndash;                        <executions>&ndash;&gt;-->
+<!--&lt;!&ndash;                            <execution>&ndash;&gt;-->
+<!--&lt;!&ndash;                                <phase>integration-test</phase>&ndash;&gt;-->
+<!--&lt;!&ndash;                                <id>integration-test</id>&ndash;&gt;-->
+<!--&lt;!&ndash;                                <goals>&ndash;&gt;-->
+<!--&lt;!&ndash;                                    <goal>integration-test</goal>&ndash;&gt;-->
+<!--&lt;!&ndash;                                </goals>&ndash;&gt;-->
+<!--&lt;!&ndash;                                <configuration>&ndash;&gt;-->
+<!--&lt;!&ndash;                                    <includes>&ndash;&gt;-->
+<!--&lt;!&ndash;                                        <include>**/integration</include>&ndash;&gt;-->
+<!--&lt;!&ndash;                                    </includes>&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;                                    <systemPropertyVariables>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;                                        <backend.http.port>${backend.service.http.port}</backend.http.port>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;                                    </systemPropertyVariables>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;                                </configuration>&ndash;&gt;-->
+<!--&lt;!&ndash;                            </execution>&ndash;&gt;-->
+<!--&lt;!&ndash;                            <execution>&ndash;&gt;-->
+<!--&lt;!&ndash;                                <id>verify-results</id>&ndash;&gt;-->
+<!--&lt;!&ndash;                                <goals>&ndash;&gt;-->
+<!--&lt;!&ndash;                                    <goal>verify</goal>&ndash;&gt;-->
+<!--&lt;!&ndash;                                </goals>&ndash;&gt;-->
+<!--&lt;!&ndash;                            </execution>&ndash;&gt;-->
+<!--&lt;!&ndash;                        </executions>&ndash;&gt;-->
+<!--                    </plugin>-->
+
                 </plugins>
             </build>
         </profile>
