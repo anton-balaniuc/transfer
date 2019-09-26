@@ -29,12 +29,11 @@ public class AccountController {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Transactional
-    @Operation(
-            summary = "Registers new account")
+    @Operation(summary = "Registers new account")
 
     public Response register(@Valid Account newAccount) {
         if (!accountDao.findByEmail(newAccount.getEmail()).isEmpty()) {
-            throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST).entity(new Error(Error.ACCOUNT_EXISTS)).build());
+            throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST).entity(Error.ACCOUNT_EXISTS).build());
         }
         accountDao.create(newAccount);
         return Response.status(Response.Status.CREATED).entity(newAccount.getId()).build();
