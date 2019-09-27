@@ -11,10 +11,12 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
-
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class AccountRestTest {
 
@@ -35,6 +37,14 @@ public class AccountRestTest {
     }
 
     /**
+     * Makes a GET request to the /accounts endpoint and returns a Response
+     */
+    protected Response getAll() {
+        WebTarget webTarget = client.target(baseUrl + ACCOUNTS);
+        return webTarget.request().get();
+    }
+
+    /**
      * Makes a POST request to the /accounts endpoint and returns a Response
      */
     protected Response createAccount(String email, BigDecimal amount) {
@@ -51,26 +61,27 @@ public class AccountRestTest {
 
     @Test
     public void getAccount_notExists_404() {
-        assertEquals(
-                Response.Status.NOT_FOUND.getStatusCode(), getAccount(100100).getStatus(), "Retrieving an account that does not exist should return 404");
+        assertEquals(Response.Status.NOT_FOUND.getStatusCode(), getAccount(100100).getStatus(), "Retrieving an " +
+                "account that does not exist should return 404");
     }
 
     @Test
     public void getAccount_NegativeId_500() {
-        assertEquals(
-                Response.Status.BAD_REQUEST.getStatusCode(), getAccount(-1).getStatus(), "Retrieving an account with negative id should return 500");
+        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), getAccount(-1).getStatus(), "Retrieving an account " +
+                "with negative id should return 500");
     }
 
     @Test
     public void createAccount_notValidEmail_500() {
-        assertEquals(
-                Response.Status.BAD_REQUEST.getStatusCode(), createAccount("not_an_email", new BigDecimal(100)).getStatus(), "Creating an account with not valid email should return 500");
+        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(),
+                createAccount("not_an_email", new BigDecimal(100)).getStatus(), "Creating an account with not valid " +
+                        "email should return 500");
     }
 
     @Test
     public void createAccount_negativeAmount_500() {
-        assertEquals(
-                Response.Status.BAD_REQUEST.getStatusCode(), createAccount("email@example.com", new BigDecimal(-100)).getStatus(), "Creating an account with negative amount id should return 500");
+        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), createAccount("email@example.com",
+                new BigDecimal(-100)).getStatus(), "Creating an account with negative amount id should return 500");
     }
 
     @Test
@@ -78,14 +89,15 @@ public class AccountRestTest {
         String email = "email_3@example.com";
         BigDecimal amount = new BigDecimal(100);
         createAccount(email, amount);
-        assertEquals(
-                Response.Status.BAD_REQUEST.getStatusCode(), createAccount(email, amount).getStatus(), "Creating an account with existing email should return 500");
+        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), createAccount(email, amount).getStatus(), "Creating" +
+                " an account with existing email should return 500");
     }
 
     @Test
     public void getAccount_existing_201() {
-        assertEquals(
-                Response.Status.CREATED.getStatusCode(), createAccount("email@example.com", new BigDecimal(100)).getStatus(), "Creating a valid account should return 201");
+        assertEquals(Response.Status.CREATED.getStatusCode(),
+                createAccount("email@example.com", new BigDecimal(100)).getStatus(), "Creating a valid account should" +
+                        " return 201");
     }
 
     @Test
@@ -98,6 +110,17 @@ public class AccountRestTest {
         assertEquals(id, account.getId(), "account must have the same id");
         assertEquals(amount, account.getBalance(), "account must have the same balance");
         assertEquals(email, account.getEmail(), "account must have the same email");
+    }
+
+    @Test
+    public void getAll_accounts_200() {
+        String email = "email_4@example.com";
+        BigDecimal amount = new BigDecimal(100);
+        createAccount(email, amount);
+        List<Account> accounts = jsonb.fromJson(getAll().readEntity(String.class), new ArrayList<Account>() {
+        }.getClass().getGenericSuperclass());
+
+        assertTrue(!accounts.isEmpty(), "accounts list should not be empty");
     }
 
 }
