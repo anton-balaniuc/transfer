@@ -1,20 +1,16 @@
 package com.payments.account.web;
 
-import com.payments.account.model.Account;
-import com.payments.account.model.Error;
-import com.payments.account.model.Transaction;
 import com.payments.account.repo.TransactionDao;
-import org.eclipse.microprofile.openapi.annotations.Operation;
 
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
-import javax.transaction.Transactional;
-import javax.validation.Valid;
 import javax.validation.constraints.Positive;
-import javax.ws.rs.*;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.math.BigDecimal;
 
 @RequestScoped
 @Path("transactions")
@@ -24,23 +20,18 @@ public class TransactionController {
 
 
     @GET
-    @Path("{id}")
+    @Path("{accountId}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response find(@PathParam("id") @Positive int transactionId) {
-        Transaction transaction = transactionDao.find(transactionId);
+    public Response findByAccount(@PathParam("accountId") @Positive int transactionId) {
 
-        if (transaction == null) {
-            return Response.status(Response.Status.NOT_FOUND).build();
-        }
-
-        return Response.ok(transaction).build();
+        return Response.ok(transactionDao.findByAccountId(transactionId)).build();
 
 
     }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response findAll() {
+    public Response findAllTransactions() {
         return Response.ok(transactionDao.getAll()).build();
     }
 

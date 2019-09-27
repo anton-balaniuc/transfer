@@ -17,11 +17,13 @@ public class TransactionDao {
         em.persist(transaction);
     }
 
-    public Transaction find(Integer id) {
-        return em.find(Transaction.class, id);
-    }
-
     public List<Transaction> getAll() {
         return em.createNamedQuery("Transaction.findAll", Transaction.class).getResultList();
+    }
+
+    public List<Transaction> findByAccountId(Integer accountId) {
+        return em.createNamedQuery("Transaction.findByAccount", Transaction.class)
+                .setParameter("accountId", accountId)
+                .getResultList();
     }
 }

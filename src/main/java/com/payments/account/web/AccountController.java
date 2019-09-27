@@ -1,11 +1,7 @@
 package com.payments.account.web;
 
 import com.payments.account.model.Account;
-import com.payments.account.model.Error;
-import com.payments.account.model.Transaction;
-import com.payments.account.model.TransactionType;
-import com.payments.account.repo.AccountDao;
-import com.payments.account.repo.TransactionDao;
+import com.payments.account.service.AccountService;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 
 import javax.enterprise.context.RequestScoped;
@@ -21,21 +17,20 @@ import java.math.BigDecimal;
 @RequestScoped
 @Path("accounts")
 public class AccountController {
+
+    private AccountService accountService;
+
     @Inject
-    private AccountDao accountDao;
-    @Inject
-    private TransactionDao transactionDao;
+    public void setAccountService(AccountService accountService) {
+        this.accountService = accountService;
+    }
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Transactional
     @Operation(summary = "Registers new account")
-
     public Response register(@Valid Account newAccount) {
-        if (!accountDao.findByEmail(newAccount.getEmail()).isEmpty()) {
-            throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST).entity(Error.ACCOUNT_EXISTS).build());
-        }
-        accountDao.create(newAccount);
+        accountService.create(newAccount);
         return Response.status(Response.Status.CREATED).entity(newAccount.getId()).build();
     }
 
@@ -43,41 +38,20 @@ public class AccountController {
     @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response find(@PathParam("id") @Positive int accountId) {
-        Account account = accountDao.find(accountId);
-
-        if (account == null) {
-            return Response.status(Response.Status.NOT_FOUND).build();
-        }
-
-        return Response.ok(account).build();
-
-
+        return Response.ok(accountService.find(accountId)).build();
     }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response findAll() {
-        return Response.ok(accountDao.getAll()).build();
+        return Response.ok(accountService.getAll()).build();
     }
 
     @PUT
     @Path("{id}/deposit/{amount}")
     @Transactional
     public Response deposit(@PathParam("id") @Positive int accountId, @PathParam("amount") @Positive BigDecimal amount) {
-        Account account = accountDao.find(accountId);
-        if (account == null) {
-            return Response.status(Response.Status.NOT_FOUND).build();
-        }
-
-        Transaction transaction = new Transaction();
-        transaction.setTransactionType(TransactionType.DEPOSIT);
-        transaction.setAmount(amount);
-        transaction.setCredit(account);
-        transaction.setDebit(account);
-
-        account.deposit(amount);
-        accountDao.update(account);
-        transactionDao.create(transaction);
+        accountService.deposit(accountId, amount);
         return Response.ok().build();
     }
 
@@ -85,24 +59,8 @@ public class AccountController {
     @Path("{id}/withdrawal/{amount}")
     @Transactional
     public Response withdrawal(@PathParam("id") @Positive int accountId, @PathParam("amount") @Positive BigDecimal amount) {
-        Account account = accountDao.find(accountId);
-        if (account == null) {
-            return Response.status(Response.Status.NOT_FOUND).build();
-        }
 
-        if (account.getBalance().compareTo(amount) < 0 ) {
-            return Response.status(Response.Status.BAD_REQUEST).build();
-        }
-
-        Transaction transaction = new Transaction();
-        transaction.setTransactionType(TransactionType.WITHDRAW);
-        transaction.setAmount(amount);
-        transaction.setCredit(account);
-        transaction.setDebit(account);
-
-        account.withdrawal(amount);
-        accountDao.update(account);
-        transactionDao.create(transaction);
+        accountService.withdrawal(accountId, amount);
         return Response.ok().build();
     }
 
@@ -112,31 +70,7 @@ public class AccountController {
     public Response transfer(@PathParam("from") @Positive int from,
                              @PathParam("to") @Positive int to,
                              @PathParam("amount") @Positive BigDecimal amount) {
-        Account sender = accountDao.find(from);
-        if (sender == null) {
-            return Response.status(Response.Status.NOT_FOUND).build();
-        }
-
-        if (sender.getBalance().compareTo(amount) < 0 ) {
-            return Response.status(Response.Status.BAD_REQUEST).build();
-        }
-
-        Account receiver = accountDao.find(to);
-        if (receiver == null) {
-            return Response.status(Response.Status.NOT_FOUND).build();
-        }
-
-
-
-        Transaction transaction = new Transaction();
-        transaction.setTransactionType(TransactionType.TRANSFER);
-        transaction.setAmount(amount);
-        transaction.setCredit(sender);
-        transaction.setDebit(receiver);
-
-        receiver.withdrawal(amount);
-        accountDao.update(receiver);
-        transactionDao.create(transaction);
+        accountService.transfer(from, to, amount);
         return Response.ok().build();
     }
 }

@@ -8,6 +8,7 @@ import java.util.Objects;
 @Entity
 @Table(name = "AccountTransaction")
 @NamedQuery(name = "Transaction.findAll", query = "SELECT t FROM Transaction t")
+@NamedQuery(name = "Transaction.findByAccount", query = "SELECT t FROM Transaction t where t.from.id = :accountId or t.to.id = :accountId")
 public class Transaction {
 
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -16,10 +17,10 @@ public class Transaction {
     private int id;
     @ManyToOne
     @JoinColumn
-    private Account debit;
+    private Account from;
     @OneToOne
     @JoinColumn
-    private Account credit;
+    private Account to;
     @Column
     private BigDecimal amount;
     @Column
@@ -34,20 +35,20 @@ public class Transaction {
         this.id = id;
     }
 
-    public Account getDebit() {
-        return debit;
+    public Account getFrom() {
+        return from;
     }
 
-    public void setDebit(Account debit) {
-        this.debit = debit;
+    public void setFrom(Account from) {
+        this.from = from;
     }
 
-    public Account getCredit() {
-        return credit;
+    public Account getTo() {
+        return to;
     }
 
-    public void setCredit(Account credit) {
-        this.credit = credit;
+    public void setTo(Account to) {
+        this.to = to;
     }
 
     public BigDecimal getAmount() {
@@ -68,7 +69,7 @@ public class Transaction {
 
     @Override
     public String toString() {
-        return "Transaction{" + "id=" + id + ", debit=" + debit + ", credit=" + credit + ", amount=" + amount + ", " +
+        return "Transaction{" + "id=" + id + ", debit=" + from + ", credit=" + to + ", amount=" + amount + ", " +
                 "operation=" + transactionType + '}';
     }
 
@@ -79,11 +80,60 @@ public class Transaction {
         if (o == null || getClass() != o.getClass())
             return false;
         Transaction that = (Transaction) o;
-        return id == that.id && Objects.equals(debit, that.debit) && Objects.equals(credit, that.credit) && Objects.equals(amount, that.amount) && transactionType == that.transactionType;
+        return id == that.id && Objects.equals(from, that.from) && Objects.equals(to, that.to) && Objects.equals(amount, that.amount) && transactionType == that.transactionType;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, debit, credit, amount, transactionType);
+        return Objects.hash(id, from, to, amount, transactionType);
     }
+
+
+    public static class Builder {
+
+        private Account from;
+        private Account to;
+        private BigDecimal amount;
+        private TransactionType transactionType;
+
+        public Builder() {
+        }
+
+        Builder(Account from, Account to, BigDecimal amount, TransactionType transactionType) {
+            this.from = from;
+            this.to = to;
+            this.amount = amount;
+            this.transactionType = transactionType;
+        }
+
+        public Builder from(Account from){
+            this.from = from;
+            return Builder.this;
+        }
+
+        public Builder to(Account to){
+            this.to = to;
+            return Builder.this;
+        }
+
+        public Builder amount(BigDecimal amount){
+            this.amount = amount;
+            return Builder.this;
+        }
+
+        public Builder transactionType(TransactionType transactionType){
+            this.transactionType = transactionType;
+            return Builder.this;
+        }
+
+        public Transaction build() {
+            Transaction transaction = new Transaction();
+            transaction.setAmount(this.amount);
+            transaction.setFrom(this.from);
+            transaction.setTo(this.to);
+            transaction.setTransactionType(this.transactionType);
+            return transaction;
+        }
+    }
+
 }
