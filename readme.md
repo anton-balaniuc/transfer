@@ -23,9 +23,9 @@ or for the text representation.
     http://localhost:8181/openapi
 
 Unit test has the following format: 1_2_3() throws Exception, where
-1 - is method to be tested
-2 - method condition
-3 - expected result.
+* 1 - is method to be tested
+* 2 - method condition
+* 3 - expected result.
 For example,
 create_emailExists_AccountAlreadyExistsException
 will test `create` method with account whose email already exists and expects `AccountAlreadyExistsException` to be thrown.
