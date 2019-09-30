@@ -1,59 +1,25 @@
-# MicroProfile generated Application
+# Transfer restful service
 
 ## Introduction
 
-MicroProfile Starter has generated this MicroProfile application for you.
+This application uses the following:
 
-The generation of the executable jar file can be performed by issuing the following command
+* [Microprofile](https://microprofile.io/) as microservice framework 
+* [Apache Derby](https://db.apache.org/derby/) as in-memory DB
+* [Open Liberty](https://openliberty.io/) as web-application server 
+* [Junit 5](https://junit.org/junit5/) as testing framework 
+* [Mockito](https://site.mockito.org/) as mocking framework 
 
-    mvn clean package
+The application can be started by executing the following command
 
-This will create an executable jar file **account.jar** within the _target_ maven folder. This can be started by executing the following command
+    mvn clean install liberty:start-server
 
-    java -jar target/account.jar
+To launch the openapi ui  page, open your browser at the following URL
 
-To launch the test page, open your browser at the following URL
+    http://localhost:8181/openapi/ui
+     
+or for the text representation. 
 
-    http://localhost:8181/index.html
-
-## Specification examples
-
-By default, there is always the creation of a JAX-RS application class to define the path on which the JAX-RS endpoints are available.
-
-Also, a simple Hello world endpoint is created, have a look at the class **HelloController**.
-
-More information on MicroProfile can be found [here](https://microprofile.io/)
-
-
-
-
-
-
-### Health
-
-The health status can be used to determine if the 'computing node' needs to be discarded/restarted or not. Specification [here](https://microprofile.io/project/eclipse/microprofile-health)
-
-The class **ServiceHealthCheck** contains an example of a custom check which can be integrated to health status checks of the instance.  The index page contains a link to the status data.
-
-
-
-### Metrics
-
-The Metrics exports _Telemetric_ data in a uniform way of system and custom resources. Specification [here](https://microprofile.io/project/eclipse/microprofile-metrics)
-
-The example class **MetricController** contains an example how you can measure the execution time of a request.  The index page also contains a link to the metric page (with all metric info)
-
-
-
-
-
-### Open API
-
-Exposes the information about your endpoints in the format of the OpenAPI v3 specification. Specification [here](https://microprofile.io/project/eclipse/microprofile-open-api)
-
-The index page contains a link to the OpenAPI information of your endpoints.
-
-
-
+    http://localhost:8181/openapi
 
 

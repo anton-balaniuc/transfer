@@ -1,5 +1,7 @@
 package com.payments.account.model;
 
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
+
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
@@ -9,22 +11,28 @@ import java.util.Objects;
 @Table(name = "AccountTransaction")
 @NamedQuery(name = "Transaction.findAll", query = "SELECT t FROM Transaction t")
 @NamedQuery(name = "Transaction.findByAccount", query = "SELECT t FROM Transaction t where t.from.id = :accountId or t.to.id = :accountId")
+@Schema(name="Transaction", description="POJO that represents the transactions contents.")
 public class Transaction {
 
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Id
     @Column
+    @Schema
     private int id;
     @ManyToOne
     @JoinColumn
+    @Schema
     private Account from;
     @OneToOne
     @JoinColumn
+    @Schema
     private Account to;
     @Column
+    @Schema
     private BigDecimal amount;
     @Column
     @NotNull
+    @Schema
     private TransactionType transactionType;
 
     public int getId() {

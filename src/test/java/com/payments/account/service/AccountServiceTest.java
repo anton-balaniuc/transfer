@@ -21,8 +21,7 @@ import java.math.BigDecimal;
 import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -41,12 +40,17 @@ class AccountServiceTest {
     EasyRandom easyRandom = new EasyRandom();
     int accountId = 10;
     private Account randomAccount;
+    private Account to;
     private BigDecimal deposit = new BigDecimal(237);
     private BigDecimal withdraw = new BigDecimal(89);
+    private BigDecimal transfer = new BigDecimal(12);
 
     @BeforeEach
     public void setup() {
          randomAccount =  easyRandom.nextObject(Account.class);
+         randomAccount.setId(10);
+         to =  easyRandom.nextObject(Account.class);
+         to.setId(randomAccount.getId() + 200);
     }
 
     @Test
@@ -174,6 +178,88 @@ class AccountServiceTest {
         sut.withdrawal(accountId, withdraw);
 
         assertEquals(expectedBalance, randomAccount.getBalance());
+
+    }
+
+    @Test
+    void transfer_fromNotfound_AccountNotFoundException() {
+        when(accountDao.find(anyInt())).thenReturn(null);
+        assertThrows(AccountNotFoundException.class, () -> {
+            sut.transfer(accountId, accountId, transfer);
+        });
+
+    }
+
+    @Test
+    void transfer_toNotfound_AccountNotFoundException() {
+        randomAccount.setBalance(transfer.multiply(BigDecimal.TEN));
+        when(accountDao.find(eq(randomAccount.getId()))).thenReturn(randomAccount);
+        when(accountDao.find(eq(to.getId()))).thenReturn(null);
+        assertThrows(AccountNotFoundException.class, () -> {
+            sut.transfer(randomAccount.getId(), to.getId(), transfer);
+        });
+    }
+
+    @Test
+    void transfer_insufficientFunds_InsufficientFundsException() {
+        randomAccount.setBalance(BigDecimal.ZERO);
+        when(accountDao.find(eq(randomAccount.getId()))).thenReturn(randomAccount);
+        assertThrows(InsufficientFundsException.class, () -> {
+            sut.transfer(randomAccount.getId(), to.getId(), transfer);
+        });
+
+    }
+
+    @Test
+    void transfer_ok_from() {
+        BigDecimal expectedBalance = randomAccount.getBalance().add(BigDecimal.TEN);
+        randomAccount.setBalance( randomAccount.getBalance().add(BigDecimal.TEN).add(transfer));
+        when(accountDao.find(eq(randomAccount.getId()))).thenReturn(randomAccount);
+        when(accountDao.find(eq(to.getId()))).thenReturn(to);
+        sut.transfer(randomAccount.getId(), to.getId(), transfer);
+
+        assertEquals(expectedBalance, randomAccount.getBalance());
+
+    }
+
+    @Test
+    void transfer_ok_to() {
+        BigDecimal expectedBalance = to.getBalance().add(transfer);
+        randomAccount.setBalance( randomAccount.getBalance().add(BigDecimal.TEN).add(transfer));
+        when(accountDao.find(eq(randomAccount.getId()))).thenReturn(randomAccount);
+        when(accountDao.find(eq(to.getId()))).thenReturn(to);
+        sut.transfer(randomAccount.getId(), to.getId(), transfer);
+
+        assertEquals(expectedBalance, to.getBalance());
+
+    }
+
+    @Test
+    void transfer_ok_transaction() {
+        BigDecimal expectedBalance = to.getBalance().add(transfer);
+        randomAccount.setBalance( randomAccount.getBalance().add(BigDecimal.TEN).add(transfer));
+        when(accountDao.find(eq(randomAccount.getId()))).thenReturn(randomAccount);
+        when(accountDao.find(eq(to.getId()))).thenReturn(to);
+        sut.transfer(randomAccount.getId(), to.getId(), transfer);
+
+        assertEquals(expectedBalance, to.getBalance());
+
+        ArgumentCaptor<Transaction> transactionArgumentCaptor = ArgumentCaptor.forClass(Transaction.class);
+        verify(transactionDao).create(transactionArgumentCaptor.capture());
+
+        Transaction transaction = transactionArgumentCaptor.getValue();
+
+        assertEquals(randomAccount.getId(), transaction.getFrom().getId());
+        assertEquals(randomAccount.getEmail(), transaction.getFrom().getEmail());
+        assertEquals(randomAccount.getBalance(), transaction.getFrom().getBalance());
+
+        assertEquals(to.getId(), transaction.getTo().getId());
+        assertEquals(to.getEmail(), transaction.getTo().getEmail());
+        assertEquals(to.getBalance(), transaction.getTo().getBalance());
+
+        assertEquals(transfer, transaction.getAmount());
+        assertEquals(TransactionType.TRANSFER, transaction.getTransactionType());
+
 
     }
 
